@@ -90,18 +90,21 @@ class UsuarioController {
     }
     
     // Eliminar un usuario
+
     static async deleteUsuario(req, res) {
         const id = req.params.id;
         try {
-            await sequelize.query('CALL DeleteUsuario(:id)', {
-                replacements: { id },
+            // Llamada al procedimiento almacenado DeleteUsuario
+            await sequelize.query('CALL DeleteUsuario(:usuario_id)', {
+                replacements: { usuario_id: id },
                 type: QueryTypes.RAW
             });
-            res.status(200).json({ message: 'Usuario eliminado correctamente' });
+            res.status(200).json({ message: 'Usuario y registros relacionados eliminados correctamente' });
         } catch (error) {
             res.status(500).json({ message: 'Error al eliminar el usuario: ' + error.message });
         }
     }
+
 }
 
 export default UsuarioController;

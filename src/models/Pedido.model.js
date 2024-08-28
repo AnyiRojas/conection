@@ -1,4 +1,4 @@
-import { DataTypes, Model } from "sequelize";
+import { Model } from "sequelize";
 import { sequelize } from "../config/db.js";
 import { Usuario } from "./Usuario.model.js";
 import { Pago } from "./Pago.model.js";
@@ -7,6 +7,13 @@ class Pedido extends Model {
     // Método para crear un nuevo pedido
     static async createPedido(pedido) {
         try {
+            const usuario = await Usuario.findByPk(pedido.usuario_id);
+            const pago = await Pago.findByPk(pedido.pago_id);
+    
+            if (!usuario || !pago) {
+                throw new Error('Usuario o Pago no encontrado');
+            }
+    
             return await this.create(pedido);
         } catch (error) {
             console.error(`Unable to create pedido: ${error}`);
@@ -62,8 +69,16 @@ Pedido.init({
         allowNull: false
     },
     total_pagado: {
-        type: DataTypes.BIGINT,
+        type: DataTypes.BIGINT(15),
         allowNull: false
+    },
+    foto_Pedido: {
+        type: DataTypes.TEXT,
+        allowNull: true
+    },
+    foto_PedidoURL: {
+        type: DataTypes.TEXT,
+        allowNull: true
     },
     usuario_id: {
         type: DataTypes.INTEGER,

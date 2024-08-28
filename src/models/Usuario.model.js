@@ -7,7 +7,7 @@ class Usuario extends Model {
     // Método para crear un nuevo usuario
     static async createUsuario(usuario) {
         try {
-            const claveEncriptada = await bcrypt.hash(usuario.contrasena_usuario, 10); // Usando un salt de 10
+            const claveEncriptada = await bcrypt.hash(usuario.contrasena_usuario, 10); 
             usuario.contrasena_usuario = claveEncriptada;
             return await this.create(usuario);
         } catch (error) {
@@ -62,7 +62,13 @@ class Usuario extends Model {
 
     // Método para comparar contraseñas
     async comparar(contrasena_usuario) {
-        return await bcrypt.compare(contrasena_usuario, this.contrasena_usuario);
+        try {
+            // Comparar la contraseña ingresada con la encriptada almacenada en la base de datos
+            return await bcrypt.compare(contrasena_usuario, this.contrasena_usuario);
+        } catch (error) {
+            console.error("Error al comparar las contraseñas:", error);
+            throw error;
+        }
     }
 }
 
