@@ -37,7 +37,7 @@ static async getPago(req, res) {
             const { nombre_pago, fecha_pago, iva, metodo_pago, subtotal_pago, total_pago } = req.body;
 
             // Validar el método de pago
-            const metodosPagoPermitidos = ['Tarjeta de credito', 'Transferencia bancaria', 'PayPal', 'Otro'];
+            const metodosPagoPermitidos = ['Nequi, DaviPlata, Efectivo, Tarjeta'];
             if (!metodosPagoPermitidos.includes(metodo_pago)) {
                 return res.status(400).json({ message: 'Método de pago no válido' });
             }
@@ -59,7 +59,7 @@ static async getPago(req, res) {
             const { nombre_pago, fecha_pago, iva, metodo_pago, subtotal_pago, total_pago } = req.body;
 
             // Validar el método de pago
-            const metodosPagoPermitidos = ['Tarjeta de credito', 'Transferencia bancaria', 'PayPal', 'Otro'];
+            const metodosPagoPermitidos = ['Nequi, DaviPlata, Efectivo, Tarjeta'];
             if (!metodosPagoPermitidos.includes(metodo_pago) || metodo_pago.trim() === '') {
                 return res.status(400).json({ message: 'Método de pago no válido o vacío' });
             }

@@ -11,6 +11,18 @@ class RegisterController {
                 return res.status(400).json({ message: "Todos los campos son requeridos." });
             }
 
+            // Verificación de existencia previa del usuario o correo
+            const existingUser = await Usuario.findOne({ where: { usuario } });
+            const existingEmail = await Usuario.findOne({ where: { correo_electronico_usuario } });
+
+            if (existingUser) {
+                return res.status(400).json({ message: "El nombre de usuario ya está en uso." });
+            }
+
+            if (existingEmail) {
+                return res.status(400).json({ message: "El correo electrónico ya está registrado." });
+            }
+
             // Encriptar la contraseña antes de guardarla
             const hashedPassword = await bcrypt.hash(contrasena_usuario, 10);
 

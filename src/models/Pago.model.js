@@ -64,7 +64,7 @@ Pago.init({
         allowNull: false
     },
     metodo_pago: {
-        type: DataTypes.ENUM('Tarjeta de credito', 'Transferencia bancaria', 'PayPal', 'Otro'),
+        type: DataTypes.ENUM('Nequi, DaviPlata, Efectivo, Tarjeta'),
         allowNull: false
     },
     subtotal_pago: {

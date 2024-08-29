@@ -21,14 +21,18 @@ const app = express();
 // Middleware para manejar la carga de archivos
 app.use(fileUpload());
 
+// Middleware para parsear cuerpos de solicitudes JSON
 app.use(express.json());
-
-
 
 // Servir archivos estáticos desde la carpeta 'uploads'
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Usar las rutas de la aplicación
 app.use(usuarioRoutes, productoRoutes, pedidoRoutes, pedido_ventaRoutes, pagoRoutes, informe_pedidoRoutes, historial_pedidoRoutes, envioRoutes, detalle_pedidoRoutes)
+
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({ message: 'Algo salió mal. Intenta nuevamente más tarde.' });
+});
 
 export default app;

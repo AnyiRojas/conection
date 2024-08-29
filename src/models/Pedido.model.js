@@ -1,7 +1,7 @@
-import { Model } from "sequelize";
-import { sequelize } from "../config/db.js";
-import { Usuario } from "./Usuario.model.js";
-import { Pago } from "./Pago.model.js";
+import { Model, DataTypes } from 'sequelize'; // Importar DataTypes
+import { sequelize } from '../config/db.js';
+import { Usuario } from './Usuario.model.js';
+import { Pago } from './Pago.model.js';
 
 class Pedido extends Model {
     // Método para crear un nuevo pedido
@@ -45,7 +45,10 @@ class Pedido extends Model {
     static async updatePedido(id, updated_pedido) {
         try {
             const pedido = await this.findByPk(id);
-            return pedido.update(updated_pedido);
+            if (!pedido) {
+                throw new Error('Pedido no encontrado');
+            }
+            return await pedido.update(updated_pedido);
         } catch (error) {
             console.error(`Unable to update the pedido: ${error}`);
             throw error;
@@ -69,7 +72,7 @@ Pedido.init({
         allowNull: false
     },
     total_pagado: {
-        type: DataTypes.BIGINT(15),
+        type: DataTypes.BIGINT,
         allowNull: false
     },
     foto_Pedido: {
