@@ -9,16 +9,14 @@ class LoginController {
   static async login(req, res) {
     try {
       const { correo_electronico_usuario, contrasena_usuario } = req.body;
-      const usuario = await Usuario.findOne({ where: { correo_electronico_usuario: correo_electronico_usuario } });
+      const usuario = await Usuario.findOne({ where: { correo_electronico_usuario } });
       if (usuario) {
         const hashedPassword = usuario.contrasena_usuario;
         const isMatch = bcrypt.compare(contrasena_usuario, hashedPassword);
         if (isMatch) {
-          const token = jwt.sign({ id: usuario.id_usuario }, process.env.JWT_SECRET, {
-            expiresIn: "1h",
-          });
+          const token = jwt.sign({ id: usuario.id_usuario }, process.env.JWT_SECRET, { expiresIn: "1h" });
 
-          return res.status(201).json({
+          return res.status(200).json({
             message: "Inicio de sesión exitoso",
             token,
             Usuario: {

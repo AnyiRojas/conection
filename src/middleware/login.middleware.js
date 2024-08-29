@@ -1,27 +1,23 @@
+// middleware/login.middleware.js
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
+import { Usuario } from '../models/Usuario.model.js';
 
 dotenv.config();
 
-const authMiddleware = (req, res, next) => {
-    // Obtiene el token del encabezado
-    const authHeader = req.header('Authorization');
+const authMiddleware = async (req, res, next) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
 
-    if (!authHeader) {
-        return res.status(401).json({ message: 'Acceso denegado. No se proporcionó un token.' });
-    }
+    if (token == null) return res.sendStatus(401); // No token provided
 
     try {
-        // Divide el token del formato 'Bearer [token]'
-        const token = authHeader.split(' ')[1];
-        // Verifica y decodifica el token
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        // Adjunta la información del usuario decodificada al objeto de la solicitud (req)
-        req.user = decoded;
-        // Continua hacia la siguiente función en la pila de middleware o la ruta
+        req.user = await Usuario.findByPk(decoded.id);
+        if (!req.user) return res.sendStatus(404); // User not found
         next();
     } catch (error) {
-        return res.status(400).json({ message: 'Token no válido.' });
+        res.status(403).json({ message: 'Token no válido.' });
     }
 };
 

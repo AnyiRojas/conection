@@ -9,6 +9,7 @@ import informe_pedidoRoutes from './routes/informe_pedido.routes.js';
 import historial_pedidoRoutes from './routes/historial_pedido.routes.js';
 import envioRoutes from './routes/envio.routes.js';
 import detalle_pedidoRoutes from './routes/detalle_pedido.routes.js';
+import protectedRoutes from './routes/protectedRoutes.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -28,7 +29,7 @@ app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Usar las rutas de la aplicación
-app.use(usuarioRoutes, productoRoutes, pedidoRoutes, pedido_ventaRoutes, pagoRoutes, informe_pedidoRoutes, historial_pedidoRoutes, envioRoutes, detalle_pedidoRoutes)
+app.use(usuarioRoutes, productoRoutes, pedidoRoutes, pedido_ventaRoutes, pagoRoutes, informe_pedidoRoutes, historial_pedidoRoutes, envioRoutes, detalle_pedidoRoutes, protectedRoutes)
 
 app.use((err, req, res, next) => {
     console.error(err.stack);
