@@ -5,13 +5,13 @@ import LoginController from '../controllers/login.controller.js';
 
 const router = Router();
 
+// Rutas para los usuarios
 router.get('/api/usuario', UsuarioController.getUsuarios);
 router.get('/api/usuario/:id', UsuarioController.getUsuarioById);
 router.post('/api/usuario', UsuarioController.postUsuario);
 router.put('/api/usuario/:id', UsuarioController.putUsuario);
-router.patch('/api/usuario/:id', UsuarioController.patchUsuarioEstado);
+router.patch('/api/usuario/:id/estado', UsuarioController.patchUsuarioEstado);
 router.delete('/api/usuario/:id', UsuarioController.deleteUsuario);
-router.post('/api/register', RegisterController.register);
+router.post('/api/register', RegisterController.register); 
 router.post('/api/login', LoginController.login);
-
 export default router;

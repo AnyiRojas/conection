@@ -19,11 +19,11 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const app = express();
 
+const app = express();
 app.use(cors());
-app.use(fileUpload());
 app.use(express.json());
+app.use(fileUpload());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(usuarioRoutes, productoRoutes, pedidoRoutes, pedido_ventaRoutes, pagoRoutes, informe_pedidoRoutes, historial_pedidoRoutes, envioRoutes, detalle_pedidoRoutes, protectedRoutes, eventosRoutes, carritoRoutes);
 
