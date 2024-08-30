@@ -1,5 +1,6 @@
 import express from 'express';
 import fileUpload from 'express-fileupload';
+import cors from 'cors';
 import usuarioRoutes from './routes/usuario.routes.js';
 import productoRoutes from './routes/producto.routes.js';
 import pedidoRoutes from './routes/pedido.routes.js';
@@ -10,26 +11,21 @@ import historial_pedidoRoutes from './routes/historial_pedido.routes.js';
 import envioRoutes from './routes/envio.routes.js';
 import detalle_pedidoRoutes from './routes/detalle_pedido.routes.js';
 import protectedRoutes from './routes/protectedRoutes.js';
+import eventosRoutes from './routes/eventos.routes.js';
+import carritoRoutes from './routes/carrito.routes.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-// Obtener el directorio actual usando __filename y __dirname en módulos ES
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// Middleware para manejar la carga de archivos
+app.use(cors());
 app.use(fileUpload());
-
-// Middleware para parsear cuerpos de solicitudes JSON
 app.use(express.json());
-
-// Servir archivos estáticos desde la carpeta 'uploads'
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
-// Usar las rutas de la aplicación
-app.use(usuarioRoutes, productoRoutes, pedidoRoutes, pedido_ventaRoutes, pagoRoutes, informe_pedidoRoutes, historial_pedidoRoutes, envioRoutes, detalle_pedidoRoutes, protectedRoutes)
+app.use(usuarioRoutes, productoRoutes, pedidoRoutes, pedido_ventaRoutes, pagoRoutes, informe_pedidoRoutes, historial_pedidoRoutes, envioRoutes, detalle_pedidoRoutes, protectedRoutes, eventosRoutes, carritoRoutes);
 
 app.use((err, req, res, next) => {
     console.error(err.stack);

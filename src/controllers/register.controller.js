@@ -1,6 +1,5 @@
 import bcrypt from 'bcrypt';
 import { Usuario } from "../models/Usuario.model.js";
-
 class RegisterController {
     static async register(req, res) {
         try {
@@ -38,7 +37,7 @@ class RegisterController {
             };
 
             // Guardar el nuevo usuario en la base de datos
-            const usuarioCreado = await Usuario.createUsuario(newUser);
+            const usuarioCreado = await Usuario.create(newUser);
             return res.status(201).json({ message: "Usuario registrado exitosamente", usuario: usuarioCreado });
 
         } catch (error) {

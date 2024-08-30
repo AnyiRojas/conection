@@ -10,9 +10,12 @@ class LoginController {
     try {
       const { correo_electronico_usuario, contrasena_usuario } = req.body;
       const usuario = await Usuario.findOne({ where: { correo_electronico_usuario } });
+
       if (usuario) {
         const hashedPassword = usuario.contrasena_usuario;
-        const isMatch = bcrypt.compare(contrasena_usuario, hashedPassword);
+        // Usar await para comparar la contraseña de forma correcta
+        const isMatch = await bcrypt.compare(contrasena_usuario, hashedPassword);
+
         if (isMatch) {
           const token = jwt.sign({ id: usuario.id_usuario }, process.env.JWT_SECRET, { expiresIn: "1h" });
 
