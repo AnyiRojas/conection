@@ -3,7 +3,6 @@ import { sequelize } from "../config/db.js";
 import { Usuario } from "./Usuario.model.js";
 
 class Historial_Pedidos extends Model {
-    // Método para crear un nuevo historial de pedido
     static async createHistorial(historial) {
         try {
             return await this.create(historial);
@@ -13,7 +12,6 @@ class Historial_Pedidos extends Model {
         }
     }
 
-    // Método para obtener todos los historiales de pedidos
     static async getHistoriales() {
         try {
             return await this.findAll();
@@ -23,7 +21,6 @@ class Historial_Pedidos extends Model {
         }
     }
 
-    // Método para obtener un historial de pedido por ID
     static async getHistorialById(id) {
         try {
             return await this.findByPk(id);
@@ -33,7 +30,6 @@ class Historial_Pedidos extends Model {
         }
     }
 
-    // Método para actualizar un historial de pedido
     static async updateHistorial(id, updatedHistorial) {
         try {
             const historial = await this.findByPk(id);
@@ -48,7 +44,6 @@ class Historial_Pedidos extends Model {
     }
 }
 
-// Definición del modelo Historial_Pedidos en Sequelize
 Historial_Pedidos.init({
     id_historial: {
         type: DataTypes.INTEGER,
@@ -78,7 +73,6 @@ Historial_Pedidos.init({
     underscored: false,
 });
 
-// Relaciones
 Usuario.hasMany(Historial_Pedidos, { foreignKey: 'usuario_id' });
 Historial_Pedidos.belongsTo(Usuario, { foreignKey: 'usuario_id' });
 

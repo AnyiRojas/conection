@@ -1,62 +1,62 @@
-import { Model, DataTypes } from 'sequelize'; // Importar DataTypes
+import { Model, DataTypes } from 'sequelize';
 import { sequelize } from '../config/db.js';
 import { Usuario } from './Usuario.model.js';
 import { Pago } from './Pago.model.js';
 
 class Pedido extends Model {
-    // Método para crear un nuevo pedido
-    static async createPedido(pedido) {
-        try {
-            const usuario = await Usuario.findByPk(pedido.usuario_id);
-            const pago = await Pago.findByPk(pedido.pago_id);
-    
-            if (!usuario || !pago) {
-                throw new Error('Usuario o Pago no encontrado');
+    static async createPedido(pedidoData) {
+        const {
+            fecha_pedido,
+            estado_pedido,
+            total_pagado,
+            usuario_id,
+            pago_id,
+            foto_Pedido,
+            foto_PedidoURL
+        } = pedidoData;
+
+        return await sequelize.query(
+            'CALL CreatePedido(:fecha_pedido, :estado_pedido, :total_pagado, :usuario_id, :pago_id, :foto_Pedido, :foto_PedidoURL)',
+            {
+                replacements: { fecha_pedido, estado_pedido, total_pagado, usuario_id, pago_id, foto_Pedido, foto_PedidoURL },
+                type: DataTypes.RAW,
             }
-    
-            return await this.create(pedido);
-        } catch (error) {
-            console.error(`Unable to create pedido: ${error}`);
-            throw error;
-        }
+        );
     }
 
-    // Método para obtener todos los pedidos
     static async getPedidos() {
-        try {
-            return await this.findAll();
-        } catch (error) {
-            console.error(`Unable to find all pedidos: ${error}`);
-            throw error;
-        }
+        return await sequelize.query('CALL GetPedidos()', { type: DataTypes.SELECT });
     }
 
-    // Método para obtener un pedido por su ID
-    static async getPedidoById(id) {
-        try {
-            return await this.findByPk(id);
-        } catch (error) {
-            console.error(`Unable to find pedido by id: ${error}`);
-            throw error;
-        }
+    static async getPedidoById(id_pedido) {
+        const result = await sequelize.query(
+            'CALL GetPedidoById(:id_pedido)',
+            { replacements: { id_pedido }, type: DataTypes.SELECT }
+        );
+        return result[0];
     }
 
-    // Método para actualizar un pedido
-    static async updatePedido(id, updated_pedido) {
-        try {
-            const pedido = await this.findByPk(id);
-            if (!pedido) {
-                throw new Error('Pedido no encontrado');
+    static async updatePedido(id_pedido, updatedData) {
+        const {
+            fecha_pedido,
+            estado_pedido,
+            total_pagado,
+            usuario_id,
+            pago_id,
+            foto_Pedido,
+            foto_PedidoURL
+        } = updatedData;
+
+        return await sequelize.query(
+            'CALL UpdatePedido(:id_pedido, :fecha_pedido, :estado_pedido, :total_pagado, :usuario_id, :pago_id, :foto_Pedido, :foto_PedidoURL)',
+            {
+                replacements: { id_pedido, fecha_pedido, estado_pedido, total_pagado, usuario_id, pago_id, foto_Pedido, foto_PedidoURL },
+                type: DataTypes.RAW,
             }
-            return await pedido.update(updated_pedido);
-        } catch (error) {
-            console.error(`Unable to update the pedido: ${error}`);
-            throw error;
-        }
+        );
     }
 }
 
-// Definición del modelo Pedido en Sequelize
 Pedido.init({
     id_pedido: {
         type: DataTypes.INTEGER,
@@ -106,7 +106,6 @@ Pedido.init({
     underscored: false,
 });
 
-// Relaciones
 Usuario.hasMany(Pedido, { foreignKey: 'usuario_id' });
 Pedido.belongsTo(Usuario, { foreignKey: 'usuario_id' });
 

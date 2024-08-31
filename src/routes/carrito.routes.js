@@ -3,9 +3,8 @@ import CarritoController from '../controllers/carrito.controller.js';
 
 const router = express.Router();
 
-router.post('/api/carrito', CarritoController.postCarrito);
-router.post('/api/carrito/:carrito_id/productos', CarritoController.addProductoToCarrito);
-router.delete('/api/carrito/:carrito_id/productos/:producto_id', CarritoController.removeProductoFromCarrito);
-router.get('/api/carrito/:carrito_id', CarritoController.getCarritoContent);
+router.post('/api/carrito', CarritoController.addProductoToCarrito);
+router.get('/api/usuario/:usuario_id', CarritoController.getCarritoByUsuarioId);
+router.delete('/api/carrito/:id', CarritoController.removeProductoFromCarrito);
 
 export default router;

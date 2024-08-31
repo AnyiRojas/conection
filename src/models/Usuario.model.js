@@ -1,4 +1,3 @@
-// src/models/Usuario.model.js
 import { DataTypes, Model, QueryTypes } from "sequelize";
 import { sequelize } from "../config/db.js";
 import bcrypt from 'bcrypt';
@@ -6,9 +5,17 @@ import bcrypt from 'bcrypt';
 class Usuario extends Model {
   static async createUsuario(usuario) {
     try {
-      const claveEncriptada = await bcrypt.hash(usuario.contrasena_usuario, 10); 
+      const claveEncriptada = await bcrypt.hash(usuario.contrasena_usuario, 10);
       usuario.contrasena_usuario = claveEncriptada;
-      return await this.create(usuario);
+
+      await sequelize.query(
+        'CALL CreateUsuario(:nombre_usuario, :apellido_usuario, :celular_usuario, :correo_electronico_usuario, :usuario, :contrasena_usuario, :rol_usuario, :estado_usuario)', 
+        {
+          replacements: usuario,
+          type: QueryTypes.RAW
+        }
+      );
+      return { message: 'Usuario creado exitosamente' };
     } catch (error) {
       console.error(`Unable to create usuario: ${error}`);
       throw error;
@@ -17,7 +24,8 @@ class Usuario extends Model {
 
   static async getUsuarios() {
     try {
-      return await this.findAll();
+      const usuarios = await sequelize.query('CALL GetUsuarios()', { type: QueryTypes.RAW });
+      return usuarios;
     } catch (error) {
       console.error(`Unable to find all usuarios: ${error}`);
       throw error;
@@ -26,7 +34,11 @@ class Usuario extends Model {
 
   static async getUsuarioById(id) {
     try {
-      return await this.findByPk(id);
+      const usuario = await sequelize.query('CALL GetUsuarioById(:id)', {
+        replacements: { id },
+        type: QueryTypes.RAW
+      });
+      return usuario;
     } catch (error) {
       console.error(`Unable to find usuario by id: ${error}`);
       throw error;
@@ -35,20 +47,27 @@ class Usuario extends Model {
 
   static async updateUsuario(id, updated_usuario) {
     try {
-      const usuario = await this.findByPk(id);
-      return usuario.update(updated_usuario);
+      await sequelize.query(
+        'CALL UpdateUsuario(:id, :nombre_usuario, :apellido_usuario, :celular_usuario, :correo_electronico_usuario, :usuario)', 
+        {
+          replacements: { id, ...updated_usuario },
+          type: QueryTypes.RAW
+        }
+      );
+      return { message: 'Usuario actualizado exitosamente' };
     } catch (error) {
-      console.error(`Unable to update the usuario: ${error}`);
+      console.error(`Unable to update usuario: ${error}`);
       throw error;
     }
   }
 
   static async toggleUsuarioState(id) {
     try {
-      const usuario = await this.findByPk(id);
-      const newState = usuario.estado_usuario === '1' ? '0' : '1';
-      await usuario.update({ estado_usuario: newState });
-      return usuario;
+      await sequelize.query('CALL ToggleUsuarioEstado(:id)', {
+        replacements: { id },
+        type: QueryTypes.RAW
+      });
+      return { message: 'Estado de usuario actualizado' };
     } catch (error) {
       console.error(`Unable to toggle usuario state: ${error}`);
       throw error;
@@ -63,7 +82,6 @@ class Usuario extends Model {
       throw error;
     }
   }
-  
 }
 
 Usuario.init({

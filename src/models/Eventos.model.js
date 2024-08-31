@@ -1,71 +1,96 @@
 import { DataTypes, Model } from 'sequelize';
 import { sequelize } from '../config/db.js';
+import { QueryTypes } from 'sequelize';
 
 class Evento extends Model {
-    // Método para crear un nuevo evento
     static async createEvento(evento) {
         try {
-            return await this.create(evento);
+            const result = await sequelize.query(
+                'CALL AddEvento(:tipo_evento, :fecha_evento, :descripcion_evento, :foto_evento, :foto_eventoURL)',
+                {
+                    replacements: {
+                        tipo_evento: evento.tipo_evento,
+                        fecha_evento: evento.fecha_evento,
+                        descripcion_evento: evento.descripcion_evento,
+                        foto_evento: evento.foto_evento,
+                        foto_eventoURL: evento.foto_eventoURL
+                    },
+                    type: QueryTypes.RAW
+                }
+            );
+            return result[0]; // Devuelve los datos de eventos
         } catch (error) {
             console.error(`Unable to create evento: ${error}`);
             throw error;
         }
     }
 
-    // Método para obtener todos los eventos
     static async getEventos() {
         try {
-            return await this.findAll();
+            const eventos = await sequelize.query('CALL GetAllEventos()', { type: QueryTypes.RAW });
+            return eventos[0]; 
         } catch (error) {
             console.error(`Unable to find all eventos: ${error}`);
             throw error;
         }
     }
 
-    // Método para obtener un evento por tipo
-    static async getEventoByTipo(tipo_evento) {
+    static async getEventoById(id_evento) {
         try {
-            return await this.findOne({ where: { tipo_evento } });
+            const evento = await sequelize.query(
+                'CALL GetEventoById(:id_evento)',
+                {
+                    replacements: { id_evento },
+                    type: QueryTypes.RAW
+                }
+            );
+            return evento[0][0];
         } catch (error) {
-            console.error(`Unable to find evento by tipo_evento: ${error}`);
+            console.error(`Unable to find evento by id_evento: ${error}`);
             throw error;
         }
     }
 
-    // Método para actualizar un evento
     static async updateEvento(id_evento, evento) {
         try {
-            const eventoExistente = await this.findByPk(id_evento);
-
-            if (!eventoExistente) {
-                throw new Error('Evento no encontrado');
-            }
-
-            await eventoExistente.update(evento);
-            return eventoExistente;
+            const result = await sequelize.query(
+                'CALL UpdateEvento(:id_evento, :tipo_evento, :fecha_evento, :descripcion_evento, :foto_evento, :foto_eventoURL)',
+                {
+                    replacements: {
+                        id_evento,
+                        tipo_evento: evento.tipo_evento,
+                        fecha_evento: evento.fecha_evento,
+                        descripcion_evento: evento.descripcion_evento,
+                        foto_evento: evento.foto_evento,
+                        foto_eventoURL: evento.foto_eventoURL
+                    },
+                    type: QueryTypes.RAW
+                }
+            );
+            return result[0];
         } catch (error) {
             console.error(`Unable to update evento: ${error}`);
             throw error;
         }
     }
 
-    // Método para eliminar un evento
     static async deleteEvento(id_evento) {
         try {
-            const evento = await this.findByPk(id_evento);
-            if (!evento) {
-                throw new Error('Evento no encontrado');
-            }
-            await evento.destroy();
-            return { message: 'Evento eliminado exitosamente' };
+            const result = await sequelize.query(
+                'CALL DeleteEvento(:id_evento)',
+                {
+                    replacements: { id_evento },
+                    type: QueryTypes.RAW
+                }
+            );
+            return result[0];
         } catch (error) {
-            console.error(`Unable to delete the evento: ${error}`);
+            console.error(`Unable to delete evento: ${error}`);
             throw error;
         }
     }
 }
 
-// Definición del modelo Evento en Sequelize
 Evento.init({
     id_evento: {
         type: DataTypes.INTEGER,

@@ -1,4 +1,3 @@
-// controllers/protectedController.js
 export const clientPage = (req, res) => {
     if (req.user.rol_usuario !== 'Cliente') {
         return res.status(403).json({ message: 'No tienes permiso para acceder a esta ruta.' });

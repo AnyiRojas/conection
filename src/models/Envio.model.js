@@ -1,54 +1,68 @@
-import { DataTypes, Model } from "sequelize";
-import { sequelize } from "../config/db.js";
-import { Pedido } from "./Pedido.model.js";
+import { DataTypes, Model } from 'sequelize';
+import { sequelize } from '../config/db.js';
+import { Pedido } from './Pedido.model.js';
 
 class Envio extends Model {
-    // Método para crear un nuevo envío
-    static async createEnvio(envio) {
+    static async createEnvio(fecha_envio, estado_envio, pedido_id) {
         try {
-            return await this.create(envio);
+            await sequelize.query('CALL CreateEnvio(:fecha_envio, :estado_envio, :pedido_id)', {
+                replacements: { fecha_envio, estado_envio, pedido_id },
+                type: QueryTypes.RAW
+            });
         } catch (error) {
             console.error(`Unable to create Envio: ${error}`);
             throw error;
         }
     }
 
-    // Método para obtener todos los envíos
     static async getEnvios() {
         try {
-            return await this.findAll();
+            const [results] = await sequelize.query('CALL GetAllEnvios()', { type: QueryTypes.RAW });
+            return results;
         } catch (error) {
             console.error(`Unable to find all Envios: ${error}`);
             throw error;
         }
     }
 
-    // Método para obtener un envío por ID
     static async getEnvioById(id) {
         try {
-            return await this.findByPk(id);
+            const [results] = await sequelize.query('CALL GetEnvioById(:id)', {
+                replacements: { id },
+                type: QueryTypes.RAW
+            });
+            return results[0];
         } catch (error) {
             console.error(`Unable to find Envio by id: ${error}`);
             throw error;
         }
     }
 
-    // Método para actualizar un envío
-    static async updateEnvio(id, updatedEnvio) {
+    static async updateEnvio(id, fecha_envio, estado_envio, pedido_id) {
         try {
-            const envio = await this.findByPk(id);
-            if (envio) {
-                return await envio.update(updatedEnvio);
-            }
-            throw new Error('Envío no encontrado');
+            await sequelize.query('CALL UpdateEnvio(:id, :fecha_envio, :estado_envio, :pedido_id)', {
+                replacements: { id, fecha_envio, estado_envio, pedido_id },
+                type: QueryTypes.RAW
+            });
         } catch (error) {
             console.error(`Unable to update Envio: ${error}`);
             throw error;
         }
     }
+
+    static async deleteEnvio(id) {
+        try {
+            await sequelize.query('CALL DeleteEnvio(:id)', {
+                replacements: { id },
+                type: QueryTypes.RAW
+            });
+        } catch (error) {
+            console.error(`Unable to delete Envio: ${error}`);
+            throw error;
+        }
+    }
 }
 
-// Definición del modelo Envio en Sequelize
 Envio.init({
     id_envio: {
         type: DataTypes.INTEGER,
@@ -73,12 +87,12 @@ Envio.init({
     }
 }, {
     sequelize,
+    modelName: 'Envio',
     tableName: 'Envio',
     timestamps: false,
     underscored: false,
 });
 
-// Relaciones
 Pedido.hasMany(Envio, { foreignKey: 'pedido_id' });
 Envio.belongsTo(Pedido, { foreignKey: 'pedido_id' });
 

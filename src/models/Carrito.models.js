@@ -1,77 +1,94 @@
-import { Model, DataTypes } from 'sequelize'; 
+import { Model, DataTypes } from 'sequelize';
 import { sequelize } from '../config/db.js';
-import { Usuario } from './Usuario.model.js';
-import { Producto } from './Producto.model.js';
+import { Producto } from './Producto.model.js'; 
 
 class Carrito extends Model {
-    // Método para agregar un producto al carrito
-    static async addProductoToCarrito(carrito) {
+    static async createCarrito(usuario_id) {
         try {
-            const usuario = await Usuario.findByPk(carrito.usuario_id);
-            const producto = await Producto.findByPk(carrito.producto_id);
-    
-            if (!usuario || !producto) {
-                throw new Error('Usuario o Producto no encontrado');
-            }
-    
-            return await this.create(carrito);
+            const result = await sequelize.query('CALL CreateCarrito(:usuario_id)', {
+                replacements: { usuario_id },
+                type: sequelize.QueryTypes.RAW
+            });
+            return result;
         } catch (error) {
-            console.error(`Unable to add product to carrito: ${error}`);
+            console.error(`Error al crear carrito: ${error.message}`);
             throw error;
         }
     }
 
-    // Método para obtener todos los productos en el carrito de un usuario
     static async getCarritoByUsuarioId(usuario_id) {
         try {
-            return await this.findAll({ where: { usuario_id } });
+            const result = await sequelize.query(
+                'CALL GetCarritoContent((SELECT id_carrito FROM Carrito WHERE usuario_id = :usuario_id))',
+                {
+                    replacements: { usuario_id },
+                    type: sequelize.QueryTypes.SELECT
+                }
+            );
+            return result;
         } catch (error) {
-            console.error(`Unable to find carrito by usuario id: ${error}`);
+            console.error(`Error al obtener el contenido del carrito: ${error.message}`);
             throw error;
         }
     }
 
-    // Método para eliminar un producto del carrito
-    static async removeProductoFromCarrito(id) {
+    static async addProductoToCarrito(carrito_id, producto_id, cantidad) {
         try {
-            const carrito = await this.findByPk(id);
-            if (!carrito) {
-                throw new Error('Carrito no encontrado');
-            }
-            return await carrito.destroy();
+            const result = await sequelize.query('CALL AddProductoToCarrito(:carrito_id, :producto_id, :cantidad)', {
+                replacements: { carrito_id, producto_id, cantidad },
+                type: sequelize.QueryTypes.RAW
+            });
+            return result;
         } catch (error) {
-            console.error(`Unable to remove product from carrito: ${error}`);
+            console.error(`Error al agregar producto al carrito: ${error.message}`);
+            throw error;
+        }
+    }
+
+    static async updateProductoInCarrito(carrito_id, producto_id, cantidad) {
+        try {
+            const result = await sequelize.query('CALL UpdateProductoInCarrito(:carrito_id, :producto_id, :cantidad)', {
+                replacements: { carrito_id, producto_id, cantidad },
+                type: sequelize.QueryTypes.RAW
+            });
+            return result;
+        } catch (error) {
+            console.error(`Error al actualizar producto en el carrito: ${error.message}`);
+            throw error;
+        }
+    }
+
+    static async removeProductoFromCarrito(carrito_id, producto_id) {
+        try {
+            const result = await sequelize.query('CALL RemoveProductoFromCarrito(:carrito_id, :producto_id)', {
+                replacements: { carrito_id, producto_id },
+                type: sequelize.QueryTypes.RAW
+            });
+            return result;
+        } catch (error) {
+            console.error(`Error al eliminar producto del carrito: ${error.message}`);
             throw error;
         }
     }
 }
 
-// Definición del modelo Carrito en Sequelize
 Carrito.init({
     id_carrito: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true
     },
-    cantidad: {
-        type: DataTypes.INTEGER,
-        allowNull: false
-    },
     usuario_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
-            model: Usuario,
+            model: 'Usuario',
             key: 'id_usuario'
         }
     },
-    producto_id: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-            model: Producto,
-            key: 'id_producto'
-        }
+    fecha_creacion: {
+        type: DataTypes.DATEONLY,
+        allowNull: false
     }
 }, {
     sequelize,
@@ -80,11 +97,7 @@ Carrito.init({
     underscored: false,
 });
 
-// Relaciones
-Usuario.hasMany(Carrito, { foreignKey: 'usuario_id' });
-Carrito.belongsTo(Usuario, { foreignKey: 'usuario_id' });
-
-Producto.hasMany(Carrito, { foreignKey: 'producto_id' });
-Carrito.belongsTo(Producto, { foreignKey: 'producto_id' });
+Carrito.hasMany(Producto, { foreignKey: 'carrito_id' }); 
+Producto.belongsTo(Carrito, { foreignKey: 'carrito_id' });
 
 export { Carrito };

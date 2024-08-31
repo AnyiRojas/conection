@@ -1,55 +1,72 @@
-import { DataTypes, Model } from "sequelize";
-import { sequelize } from "../config/db.js";
-import { Pedido } from "./Pedido.model.js";
-import { Producto } from "./Producto.model.js";
+import { DataTypes, Model } from 'sequelize';
+import { sequelize } from '../config/db.js';
+import { Pedido } from './Pedido.model.js';
+import { Producto } from './Producto.model.js';
 
 class Detalle_Pedido extends Model {
-    // Método para crear un nuevo detalle de pedido
-    static async createDetallePedido(detallePedido) {
+    static async createDetallePedido(cantidad, precio_unitario, pedido_id, producto_id) {
         try {
-            return await this.create(detallePedido);
+            await sequelize.query('CALL CreateDetallePedido(:cantidad, :precio_unitario, :pedido_id, :producto_id)', {
+                replacements: { cantidad, precio_unitario, pedido_id, producto_id },
+                type: QueryTypes.RAW
+            });
         } catch (error) {
             console.error(`Unable to create Detalle_Pedido: ${error}`);
             throw error;
         }
     }
 
-    // Método para obtener todos los detalles de pedidos
     static async getDetallesPedidos() {
         try {
-            return await this.findAll();
+            const [result] = await sequelize.query('CALL GetAllDetallesPedidos()', { type: QueryTypes.RAW });
+            return result;
         } catch (error) {
             console.error(`Unable to find all Detalles_Pedidos: ${error}`);
             throw error;
         }
     }
 
-    // Método para obtener un detalle de pedido por ID
     static async getDetallePedidoById(id) {
         try {
-            return await this.findByPk(id);
+            const [result] = await sequelize.query('CALL GetDetallePedidoById(:id)', {
+                replacements: { id },
+                type: QueryTypes.RAW
+            });
+            return result[0];
         } catch (error) {
             console.error(`Unable to find Detalle_Pedido by id: ${error}`);
             throw error;
         }
     }
 
-    // Método para actualizar un detalle de pedido
-    static async updateDetallePedido(id, updatedDetallePedido) {
+    static async updateDetallePedido(id, cantidad, precio_unitario, pedido_id, producto_id) {
         try {
-            const detallePedido = await this.findByPk(id);
-            if (detallePedido) {
-                return await detallePedido.update(updatedDetallePedido);
-            }
-            throw new Error('Detalle de pedido no encontrado');
+            const [result] = await sequelize.query('CALL UpdateDetallePedido(:id, :cantidad, :precio_unitario, :pedido_id, :producto_id)', {
+                replacements: { id, cantidad, precio_unitario, pedido_id, producto_id },
+                type: QueryTypes.RAW
+            });
+            return result[1].affectedRows;
         } catch (error) {
             console.error(`Unable to update Detalle_Pedido: ${error}`);
             throw error;
         }
     }
+
+    static async deleteDetallePedido(id) {
+        try {
+            const [result] = await sequelize.query('CALL DeleteDetallePedido(:id)', {
+                replacements: { id },
+                type: QueryTypes.RAW
+            });
+            return result[1].affectedRows;
+        } catch (error) {
+            console.error(`Unable to delete Detalle_Pedido: ${error}`);
+            throw error;
+        }
+    }
 }
 
-// Definición del modelo Detalle_Pedido en Sequelize
+// Definición del modelo en Sequelize
 Detalle_Pedido.init({
     id_detalle_pedido: {
         type: DataTypes.INTEGER,
@@ -87,7 +104,6 @@ Detalle_Pedido.init({
     underscored: false,
 });
 
-// Relaciones
 Pedido.hasMany(Detalle_Pedido, { foreignKey: 'pedido_id' });
 Detalle_Pedido.belongsTo(Pedido, { foreignKey: 'pedido_id' });
 

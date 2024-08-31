@@ -1,42 +1,49 @@
 import { DataTypes, Model } from "sequelize";
 import { sequelize } from "../config/db.js";
+import { QueryTypes } from "sequelize";
 
 class Informe_Pedidos extends Model {
-    // Método para crear un nuevo informe
     static async createInforme(informe) {
         try {
-            return await this.create(informe);
+            return await sequelize.query('CALL CreateInforme(:fecha_generacion, :tipo_informe, :datos_analisis)', {
+                replacements: informe,
+                type: QueryTypes.RAW
+            });
         } catch (error) {
             console.error(`Unable to create Informe_Pedidos: ${error}`);
             throw error;
         }
     }
 
-    // Método para obtener todos los informes
     static async getInformes() {
         try {
-            return await this.findAll();
+            return await sequelize.query('CALL GetInformes()', { type: QueryTypes.RAW });
         } catch (error) {
             console.error(`Unable to find all Informes_Pedidos: ${error}`);
             throw error;
         }
     }
 
-    // Método para obtener un informe por ID
     static async getInformeById(id) {
         try {
-            return await this.findByPk(id);
+            const result = await sequelize.query('CALL GetInformeById(:id)', {
+                replacements: { id },
+                type: QueryTypes.RAW
+            });
+            return result[0];
         } catch (error) {
             console.error(`Unable to find Informe_Pedidos by id: ${error}`);
             throw error;
         }
     }
 
-    // Método para actualizar un informe
     static async updateInforme(id, updatedInforme) {
         try {
-            const informe = await this.findByPk(id);
-            return informe.update(updatedInforme);
+            const { fecha_generacion, tipo_informe, datos_analisis } = updatedInforme;
+            return await sequelize.query('CALL UpdateInforme(:id, :fecha_generacion, :tipo_informe, :datos_analisis)', {
+                replacements: { id, fecha_generacion, tipo_informe, datos_analisis },
+                type: QueryTypes.RAW
+            });
         } catch (error) {
             console.error(`Unable to update Informe_Pedidos: ${error}`);
             throw error;
@@ -44,7 +51,6 @@ class Informe_Pedidos extends Model {
     }
 }
 
-// Definición del modelo Informe_Pedidos en Sequelize
 Informe_Pedidos.init({
     id_informe: {
         type: DataTypes.INTEGER,
